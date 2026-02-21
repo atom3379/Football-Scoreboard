@@ -9,7 +9,7 @@ A customizable real-time football scoreboard system.
 ### ✅ Completed
 - Change team names and team colors  
 - Score system  
-- Match timer (including stoppage time)  
+- Match timer (include adding extra times)  
 - First half / Second half system  
 - Goal animation  
 
