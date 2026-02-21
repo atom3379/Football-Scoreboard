@@ -57,13 +57,19 @@ A customizable real-time football scoreboard system.
 ### How to use it for live streaming (OBS)
 
 - 1.Add a source "Browser".
+ 
   <img width="1920" height="1074" alt="image" src="https://github.com/user-attachments/assets/7cc66f3f-44ec-47eb-b325-89c85778cc1b" />
 
 - 2.Change the URL to ``localhost:3000`` and press OK.
+ 
   <img width="762" height="774" alt="image" src="https://github.com/user-attachments/assets/ca792638-4236-4b44-9360-4a39ec1b0c58" />
 
 - 3.Adjust the size by your opinion.
+ 
   <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/3bbdc219-11cb-42c2-8133-462e1a6d64bb" />
 
 - (Optional) 4.If you're using studio mode, press "Transition" to make it displays in program scene.
+  
   <img width="1919" height="660" alt="image" src="https://github.com/user-attachments/assets/132e0b0d-90f7-4bc9-9a04-106aac4bbaaf" />
+
+  ## That's it, Have fun!
