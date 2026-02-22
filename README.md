@@ -75,7 +75,7 @@ An open-source customizable real-time football scoreboard system.
   
   <img width="1919" height="660" alt="image" src="https://github.com/user-attachments/assets/132e0b0d-90f7-4bc9-9a04-106aac4bbaaf" 
 
-## Example
+## Animation Examples
 - Goals
 - Substitution
 - Red/Yellow Cards
