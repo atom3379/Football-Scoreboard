@@ -1,6 +1,6 @@
 # ⚽ Football Scoreboard
 
-A customizable real-time football scoreboard system.
+An open-source customizable real-time football scoreboard system.
 
 ---
 
