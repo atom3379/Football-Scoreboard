@@ -73,6 +73,13 @@ An open-source customizable real-time football scoreboard system.
 
 - (Optional) 4.If you're using Studio Mode, press "Transition" to display it in the Program scene.
   
-  <img width="1919" height="660" alt="image" src="https://github.com/user-attachments/assets/132e0b0d-90f7-4bc9-9a04-106aac4bbaaf" />
+  <img width="1919" height="660" alt="image" src="https://github.com/user-attachments/assets/132e0b0d-90f7-4bc9-9a04-106aac4bbaaf" 
 
-  ## That's it, have fun!
+## Example
+- Goals
+- Substitution
+- Red/Yellow Cards
+
+https://github.com/user-attachments/assets/1c26190d-db1b-4a1b-893f-9a906b2854b6
+
+## That's it, have fun!
