@@ -9,7 +9,6 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
 }
@@ -43,6 +42,8 @@ let timer = null;
 let match = {
   team1Name: "TEAM A",
   team2Name: "TEAM B",
+  team1Short: "TMA",
+  team2Short: "TMB",
   team1Score: 0,
   team2Score: 0,
   team1Color: "#1e88e5",
@@ -88,8 +89,18 @@ io.on("connection", (socket) => {
     io.emit("update", match);
   });
 
+  // Card event — relay to all display clients
+  socket.on("card", (data) => {
+    io.emit("card", data);
+  });
+
+  // Substitution event — relay to all display clients
+  socket.on("sub", (data) => {
+    io.emit("sub", data);
+  });
+
 });
 
 server.listen(3000, () => {
-  console.log("http://localhost:3000");
+  console.log("Server running at http://localhost:3000");
 });

@@ -4,148 +4,250 @@
 <meta charset="UTF-8">
 <script src="/socket.io/socket.io.js"></script>
 <style>
-body{
-  margin:0;
-  background:#111;
-  font-family:Arial;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+body {
+  margin: 0;
+  background: #111;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.board{
-  display:flex;
-  align-items:flex-start;
+.board {
+  display: flex;
+  align-items: flex-start;
 }
 
-.leftPanel{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  margin-right:10px;
+/* -------- LEFT PANEL -------- */
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
 }
 
-.leagueLogo{
-  width:120px;
-  height:120px;
-  background:#333;
-  overflow:hidden;
+.leagueLogo {
+  width: 120px;
+  height: 120px;
+  background: #333;
+  overflow: hidden;
 }
 
-.leagueLogo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.leagueLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.timebox{
-  width:120px;
-  height:50px;
-  background:#222;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:22px;
-  font-weight:bold;
-  position:relative;
+.timebox {
+  width: 120px;
+  height: 50px;
+  background: #222;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  position: relative;
 }
 
-.extraBox{
-  position:absolute;
-  bottom:-25px;
-  background:#e53935;
-  color:#fff;
-  padding:4px 15px;
-  font-size:16px;
-  font-weight:bold;
-  display:none;
+.extraBox {
+  position: absolute;
+  bottom: -30px;
+  background: #e53935;
+  color: #fff;
+  padding: 4px 15px;
+  font-size: 16px;
+  font-weight: bold;
+  display: none;
 }
 
 /* -------- SCORE AREA -------- */
-
-.scoreBoard{
-  position:relative;
-  width:380px;
-  overflow:hidden; /* สำคัญมาก รถไฟโดนตัดตรงนี้ */
+.scoreBoard {
+  position: relative;
+  width: 380px;
+  overflow: hidden;
 }
 
-.team{
-  display:flex;
-  align-items:center;
-  padding:15px 20px;
-  font-size:26px;
-  font-weight:bold;
-  color:#ffffff;
+/* Each team row */
+.teamRow {
+  display: flex;
+  height: 80px;
 }
 
-.team-stroke{
-  display:flex;
-  align-items:center;
-  padding:15px 20px;
-  font-size:21px;
-  font-weight:bold;
-  color:#000000;
+/* Short name box — hidden by default, shown only during card/sub animation */
+.shortBox {
+  width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  filter: brightness(0.82);
+  z-index: 1;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: nowrap;
 }
 
-
-.score{
-  margin-right:6px;
-  font-size:30px;
+.shortBox.show {
+  width: 90px;
 }
 
-/* -------- GOAL TRAIN -------- */
-
-.goalOverlay{
-  position:absolute;
-  top:0;
-  left:-100%;
-  width:100%;
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:70px;
-  font-weight:bold;
-  color:#fff;
-  background:#222;
-  pointer-events:none;
-  box-sizing:border-box;
+/* Right portion: score + name, with overlays clipped inside */
+.teamMain {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
 
-.goalOverlay span{
-  display:inline-block;
-  transition:transform 0.5s ease;
+.teamNormal {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffffff;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-/* เส้นสีทีม */
-.goalOverlay{
-  border-left:15px solid;
-  border-right:15px solid;
+.scoreBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #333;
+  flex-shrink: 0;
+  margin-right: 12px;
+  font-size: 30px;
+  font-weight: bold;
+  color: #fff;
 }
 
-/* รถไฟวิ่งผ่านแล้วหายเพราะโดน clip */
-.slide{
-  animation:trainMove 1.4s forwards;
+/* -------- SHARED OVERLAY BASE -------- */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-weight: bold;
+  color: #fff;
+  gap: 14px;
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 10;
 }
 
-@keyframes trainMove{
-  0%{
-    left:-100%;
-  }
+.overlay.show {
+  left: 0;
+}
 
-  40%{
-    left:0;
-  }
+/* -------- CARD OVERLAY -------- */
+.cardIcon {
+  width: 36px;
+  height: 46px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+}
 
-  65%{
-    left:0;   /* ค้างกลาง */
-  }
+.cardIcon.yellow { background: #FDD835; }
+.cardIcon.red    { background: #E53935; }
 
-  100%{
-    left:100%;
-  }
+.cardText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.cardType {
+  font-size: 16px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cardPlayer {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* -------- SUBSTITUTION OVERLAY -------- */
+.subContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1.2;
+}
+
+.subRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.subArrow {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.subArrow.in  { color: #66BB6A; } /* green  ▲ */
+.subArrow.out { color: #EF5350; } /* red    ▼ */
+
+.subName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -------- GOAL OVERLAY -------- */
+.goalOverlay {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 70px;
+  font-weight: bold;
+  color: #fff;
+  background: #222;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-left: 15px solid;
+  border-right: 15px solid;
+  z-index: 20;
+}
+
+.goalOverlay span {
+  display: inline-block;
+  transition: transform 0.5s ease;
+}
+
+.slide {
+  animation: trainMove 1.4s forwards;
+}
+
+@keyframes trainMove {
+  0%   { left: -100%; }
+  40%  { left: 0; }
+  65%  { left: 0; }
+  100% { left: 100%; }
 }
 </style>
 </head>
@@ -155,36 +257,94 @@ body{
 
   <div class="leftPanel">
     <div class="leagueLogo">
-      <img id="leagueImg">
+      <img id="leagueImg" src="">
     </div>
-
     <div class="timebox">
-      <span id="time"></span>
+      <span id="time">00:00</span>
       <div id="extraBox" class="extraBox"></div>
     </div>
   </div>
 
   <div class="scoreBoard">
 
-    <div id="goalBox" class="goalOverlay" style="display:none;">
-      <span>G</span>
-      <span>O</span>
-      <span>A</span>
-      <span>L</span>
+    <!-- GOAL animation -->
+    <div id="goalBox" class="goalOverlay" style="display:none; height:160px;">
+      <span>G</span><span>O</span><span>A</span><span>L</span>
     </div>
 
-    <div id="team1" class="team">
-      <div class="score" id="score1"></div>
-      <div id="name1"></div>
+    <!-- TEAM 1 ROW -->
+    <div class="teamRow" id="team1Row">
+      <div class="shortBox" id="short1Box">TMA</div>
+      <div class="teamMain" id="team1Main">
+        <div class="teamNormal" id="team1Normal">
+          <div class="scoreBox" id="scoreBox1"><span id="score1">0</span></div>
+          <span id="name1">TEAM A</span>
+        </div>
+
+        <!-- Card overlay team 1 -->
+        <div class="overlay" id="cardOverlay1">
+          <div class="cardIcon yellow" id="cardIcon1"></div>
+          <div class="cardText">
+            <span class="cardType" id="cardType1">Yellow Card</span>
+            <span class="cardPlayer" id="cardPlayer1">Player Name</span>
+          </div>
+        </div>
+
+        <!-- Substitution overlay team 1 -->
+        <div class="overlay" id="subOverlay1">
+          <div class="subContent">
+            <div class="subRow">
+              <span class="subArrow in">▲</span>
+              <span class="subName" id="subIn1">Player In</span>
+              <span style="opacity:0.7; font-size:15px;" id="subInNum1"></span>
+            </div>
+            <div class="subRow">
+              <span class="subArrow out">▼</span>
+              <span class="subName" id="subOut1">Player Out</span>
+              <span style="opacity:0.7; font-size:15px;" id="subOutNum1"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="team2" class="team">
-      <div class="score" id="score2"></div>
-      <div id="name2"></div>
+    <!-- TEAM 2 ROW -->
+    <div class="teamRow" id="team2Row">
+      <div class="shortBox" id="short2Box">TMB</div>
+      <div class="teamMain" id="team2Main">
+        <div class="teamNormal" id="team2Normal">
+          <div class="scoreBox" id="scoreBox2"><span id="score2">0</span></div>
+          <span id="name2">TEAM B</span>
+        </div>
+
+        <!-- Card overlay team 2 -->
+        <div class="overlay" id="cardOverlay2">
+          <div class="cardIcon yellow" id="cardIcon2"></div>
+          <div class="cardText">
+            <span class="cardType" id="cardType2">Yellow Card</span>
+            <span class="cardPlayer" id="cardPlayer2">Player Name</span>
+          </div>
+        </div>
+
+        <!-- Substitution overlay team 2 -->
+        <div class="overlay" id="subOverlay2">
+          <div class="subContent">
+            <div class="subRow">
+              <span class="subArrow in">▲</span>
+              <span class="subName" id="subIn2">Player In</span>
+              <span style="opacity:0.7; font-size:15px;" id="subInNum2"></span>
+            </div>
+            <div class="subRow">
+              <span class="subArrow out">▼</span>
+              <span class="subName" id="subOut2">Player Out</span>
+              <span style="opacity:0.7; font-size:15px;" id="subOutNum2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
-
 </div>
 
 <script>
@@ -194,77 +354,119 @@ let lastScore1 = null;
 let lastScore2 = null;
 
 socket.on("update", d => {
+  document.getElementById("name1").textContent  = d.team1Name;
+  document.getElementById("name2").textContent  = d.team2Name;
+  document.getElementById("score1").textContent = d.team1Score;
+  document.getElementById("score2").textContent = d.team2Score;
 
-  name1.textContent = d.team1Name;
-  name2.textContent = d.team2Name;
+  document.getElementById("short1Box").textContent = d.team1Short;
+  document.getElementById("short2Box").textContent = d.team2Short;
 
-  score1.textContent = d.team1Score;
-  score2.textContent = d.team2Score;
+  document.getElementById("team1Normal").style.background  = d.team1Color;
+  document.getElementById("team2Normal").style.background  = d.team2Color;
+  document.getElementById("team1Main").style.background    = d.team1Color;
+  document.getElementById("team2Main").style.background    = d.team2Color;
+  document.getElementById("short1Box").style.background    = d.team1Color;
+  document.getElementById("short2Box").style.background    = d.team2Color;
+  document.getElementById("cardOverlay1").style.background = d.team1Color;
+  document.getElementById("cardOverlay2").style.background = d.team2Color;
+  document.getElementById("subOverlay1").style.background  = d.team1Color;
+  document.getElementById("subOverlay2").style.background  = d.team2Color;
 
-  team1.style.background = d.team1Color;
-  team2.style.background = d.team2Color;
+  let m = Math.floor(d.seconds / 60);
+  let s = d.seconds % 60;
+  document.getElementById("time").textContent =
+    String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
 
-  let m = Math.floor(d.seconds/60);
-  let s = d.seconds%60;
-  time.textContent =
-    String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
-
-  if(d.extra>0){
-    extraBox.style.display="block";
-    extraBox.textContent="+"+d.extra+"'";
-  }else{
-    extraBox.style.display="none";
+  const extraBox = document.getElementById("extraBox");
+  if (d.extra > 0) {
+    extraBox.style.display = "block";
+    extraBox.textContent = "+" + d.extra + "'";
+  } else {
+    extraBox.style.display = "none";
   }
 
-  if(d.leagueLogo){
-    leagueImg.src=d.leagueLogo;
+  if (d.leagueLogo) {
+    document.getElementById("leagueImg").src = d.leagueLogo;
   }
 
-  /* กัน animation ตอนโหลดครั้งแรก */
-  if(lastScore1 === null){
+  if (lastScore1 === null) {
     lastScore1 = d.team1Score;
     lastScore2 = d.team2Score;
     return;
   }
 
-  if(d.team1Score > lastScore1){
-    triggerGoal(d.team1Color);
-  }
-
-  if(d.team2Score > lastScore2){
-    triggerGoal(d.team2Color);
-  }
+  if (d.team1Score > lastScore1) triggerGoal(d.team1Color);
+  if (d.team2Score > lastScore2) triggerGoal(d.team2Color);
 
   lastScore1 = d.team1Score;
   lastScore2 = d.team2Score;
 });
 
-function triggerGoal(color){
+// helper: show shortBox + one overlay, hide after delay
+let subTimers = { 1: null, 2: null };
+let cardTimers = { 1: null, 2: null };
 
-  const box = document.getElementById("goalBox");
+function showOverlay(overlayId, shortBoxId, duration) {
+  const overlay  = document.getElementById(overlayId);
+  const shortBox = document.getElementById(shortBoxId);
+  overlay.classList.add("show");
+  shortBox.classList.add("show");
+  return setTimeout(() => {
+    overlay.classList.remove("show");
+    shortBox.classList.remove("show");
+  }, duration);
+}
+
+// ---- CARD ----
+socket.on("card", (data) => {
+  const n = data.team;
+
+  document.getElementById("cardIcon"   + n).className =
+    "cardIcon " + (data.type === "Yellow Card" ? "yellow" : "red");
+  document.getElementById("cardType"   + n).textContent = data.type;
+  document.getElementById("cardPlayer" + n).textContent = "#" + data.number + " " + data.name;
+
+  // cancel any running card timer for this team
+  clearTimeout(cardTimers[n]);
+  cardTimers[n] = showOverlay("cardOverlay" + n, "short" + n + "Box", 4000);
+});
+
+// ---- SUBSTITUTION ----
+socket.on("sub", (data) => {
+  const n = data.team;
+
+  document.getElementById("subIn"     + n).textContent = data.nameIn;
+  document.getElementById("subInNum"  + n).textContent = data.numberIn  ? "#" + data.numberIn  : "";
+  document.getElementById("subOut"    + n).textContent = data.nameOut;
+  document.getElementById("subOutNum" + n).textContent = data.numberOut ? "#" + data.numberOut : "";
+
+  clearTimeout(subTimers[n]);
+  subTimers[n] = showOverlay("subOverlay" + n, "short" + n + "Box", 4000);
+});
+
+// ---- GOAL ----
+function triggerGoal(color) {
+  const box     = document.getElementById("goalBox");
   const letters = box.querySelectorAll("span");
 
-  // ตั้งค่าเริ่มต้น
-  box.style.display = "flex";
-  box.style.left = "-100%";
-  box.style.borderLeftColor = color;
+  box.style.display          = "flex";
+  box.style.left             = "-100%";
+  box.style.borderLeftColor  = color;
   box.style.borderRightColor = color;
 
-  // รีสตาร์ท animation
   box.classList.remove("slide");
   void box.offsetWidth;
   box.classList.add("slide");
 
-  // แยกตัวอักษร
-  letters[0].style.transform="translateX(-50px)";
-  letters[1].style.transform="translateX(-15px)";
-  letters[2].style.transform="translateX(15px)";
-  letters[3].style.transform="translateX(50px)";
+  letters[0].style.transform = "translateX(-50px)";
+  letters[1].style.transform = "translateX(-15px)";
+  letters[2].style.transform = "translateX(15px)";
+  letters[3].style.transform = "translateX(50px)";
 
-  // รอจน animation จบจริง ๆ
-  box.addEventListener("animationend", function handler(){
-    box.style.display="none";
-    letters.forEach(l=>l.style.transform="translateX(0)");
+  box.addEventListener("animationend", function handler() {
+    box.style.display = "none";
+    letters.forEach(l => l.style.transform = "translateX(0)");
     box.removeEventListener("animationend", handler);
   });
 }
