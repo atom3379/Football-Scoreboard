@@ -49,11 +49,12 @@ An open-source customizable real-time football scoreboard system.
 
 - 1.Open a terminal in the folder
 - or in Windows, go to the folder, right-click and select "Open in Terminal"
-- 2.Type `node server.js` in the terminal
-- 3.To view the scoreboard, open your browser and type `localhost:3000` in the address bar.
+- 2.Type `npm install` in the terminal
+- 3.Type `node server.js` in the terminal
+- 4.To view the scoreboard, open your browser and type `localhost:3000` in the address bar.
   <img width="1755" height="41" alt="image" src="https://github.com/user-attachments/assets/e1f60506-fc17-4517-91d2-f57c9f97c5d8" />
 
-- 4.To change team names, colors, start the game, etc., follow step 3 but change the URL to `localhost:3000/controller`
+- 5.To change team names, colors, start the game, etc., follow step 3 but change the URL to `localhost:3000/controller`
   <img width="1739" height="41" alt="image" src="https://github.com/user-attachments/assets/8683a8eb-886d-4ae0-9b51-ee42edc10258" />
 
 
