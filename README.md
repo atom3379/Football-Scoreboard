@@ -47,6 +47,8 @@ An open-source customizable real-time football scoreboard system.
 
 ## How to use it
 
+Make sure you have **Node.js installed.** If you haven't, click [here](https://nodejs.org/en/download).
+
 - 1.Open a terminal in the folder
 - or in Windows, go to the folder, right-click and select "Open in Terminal"
 - 2.Type `npm install` in the terminal
