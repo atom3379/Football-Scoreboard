@@ -18,7 +18,7 @@ An open-source customizable real-time football scoreboard system.
 ---
 
 ### ⌛ In Progress
-- None at the moment 
+- Penalty Kick System
 
 ---
 
