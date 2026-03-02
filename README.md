@@ -21,6 +21,7 @@ An open-source customizable real-time football scoreboard system.
 - Penalty Kick System
 
 This is an example image from the game eFootball, which we will replicate (but we won't be copying the theme exactly 100%).
+
 <img width="277" height="84" alt="image" src="https://github.com/user-attachments/assets/bc9fee75-a3ba-4b9b-a662-4f391ab86f9d" />
 
 
