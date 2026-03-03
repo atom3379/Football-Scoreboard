@@ -37,6 +37,10 @@ app.get("/controller", (req, res) => {
   res.sendFile(__dirname + "/public/controller.html");
 });
 
+app.get("/penalty", (req, res) => {
+  res.sendFile(__dirname + "/public/penalty.html");
+});
+
 let timer = null;
 
 let match = {
@@ -47,7 +51,19 @@ let match = {
   team1Score: 0,
   team2Score: 0,
   team1Color: "#1e88e5",
+  team1Color2: "#1565c0",
+  team1UseColor2: false,
+  team1TextColor: "#ffffff",
+  team1UseStroke: false,
+  team1StrokeColor: "#000000",
+  team1StrokeWidth: 1,
   team2Color: "#fdd835",
+  team2Color2: "#f9a825",
+  team2UseColor2: false,
+  team2TextColor: "#000000",
+  team2UseStroke: false,
+  team2StrokeColor: "#000000",
+  team2StrokeWidth: 1,
   seconds: 0,
   extra: 0,
   leagueLogo: ""
@@ -89,14 +105,17 @@ io.on("connection", (socket) => {
     io.emit("update", match);
   });
 
-  // Card event — relay to all display clients
   socket.on("card", (data) => {
     io.emit("card", data);
   });
 
-  // Substitution event — relay to all display clients
   socket.on("sub", (data) => {
     io.emit("sub", data);
+  });
+
+  // Penalty shootout state relay
+  socket.on("penaltyState", (data) => {
+    io.emit("penaltyState", data);
   });
 
 });
