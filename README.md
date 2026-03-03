@@ -19,7 +19,7 @@ An open-source customizable real-time football scoreboard system.
 - Yellow / Red card system  
 - Substitution display system
 - Penalty Kick System
-- 
+  
   This is penalty kick scorboard looks like :
   
   <img width="449" height="148" alt="image" src="https://github.com/user-attachments/assets/2fb9eef2-18ea-415a-9269-9274c5a20706" />
