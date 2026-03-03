@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="/socket.io/socket.io.js"></script>
+<style>
+body {
+  margin: 0;
+  background: #111;
+  font-family: 'Noto Sans Thai', Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.board {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* -------- LEFT PANEL -------- */
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.leagueLogo {
+  width: 120px;
+  height: 120px;
+  background: #333;
+  overflow: hidden;
+}
+
+.leagueLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.timeWrapper {
+  position: relative;
+  width: 120px;
+  overflow: hidden; /* clips extraBox until it slides out */
+  padding-bottom: 36px; /* reserve space so extraBox is visible when shown */
+}
+
+.timeWrapper.noExtra {
+  padding-bottom: 0;
+}
+
+.timebox {
+  width: 120px;
+  height: 50px;
+  background: #222;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+}
+
+.extraBox {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 36px;
+  background: #e53935;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  transform: translateY(-100%); /* hidden behind timebox */
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
+}
+
+.extraBox.show {
+  transform: translateY(0); /* slides down into view */
+}
+
+/* -------- SCORE AREA -------- */
+.scoreBoard {
+  position: relative;
+  width: 380px;
+  overflow: hidden;
+}
+
+/* Each team row */
+.teamRow {
+  display: flex;
+  height: 80px;
+}
+
+/* Short name box */
+.shortBox {
+  max-width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  z-index: 1;
+  transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              padding   0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: nowrap;
+  padding: 0;
+}
+
+.shortBox.show {
+  max-width: 160px; /* wide enough for any short name */
+  padding: 0 14px;
+}
+
+/* Right portion */
+.teamMain {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.teamNormal {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffffff;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.scoreBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #333;
+  flex-shrink: 0;
+  margin-right: 12px;
+  font-size: 30px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* -------- SHARED OVERLAY BASE -------- */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-weight: bold;
+  color: #fff;
+  gap: 14px;
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 10;
+}
+
+.overlay.show { left: 0; }
+
+/* -------- CARD OVERLAY -------- */
+.cardIcon {
+  width: 36px;
+  height: 46px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+}
+
+.cardIcon.yellow { background: #FDD835; }
+.cardIcon.red    { background: #E53935; }
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.cardType {
+  font-size: 16px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cardPlayer {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* -------- SUBSTITUTION OVERLAY -------- */
+.subContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1.2;
+}
+
+.subRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.subArrow { font-size: 20px; flex-shrink: 0; }
+.subArrow.in  { color: #66BB6A; }
+.subArrow.out { color: #EF5350; }
+
+.subName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* -------- GOAL OVERLAY -------- */
+.goalOverlay {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 70px;
+  font-weight: bold;
+  color: #fff;
+  background: #222;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-left: 15px solid;
+  border-right: 15px solid;
+  z-index: 20;
+}
+
+.goalOverlay span {
+  display: inline-block;
+  transition: transform 0.5s ease;
+}
+
+.slide { animation: trainMove 1.4s forwards; }
+
+@keyframes trainMove {
+  0%   { left: -100%; }
+  40%  { left: 0; }
+  65%  { left: 0; }
+  100% { left: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="board">
+
+  <div class="leftPanel">
+    <div class="leagueLogo">
+      <img id="leagueImg" src="">
+    </div>
+    <div class="timeWrapper noExtra" id="timeWrapper">
+      <div class="timebox">
+        <span id="time">00:00</span>
+      </div>
+      <div id="extraBox" class="extraBox"></div>
+    </div>
+  </div>
+
+  <div class="scoreBoard">
+
+    <div id="goalBox" class="goalOverlay" style="display:none; height:160px;">
+      <span>G</span><span>O</span><span>A</span><span>L</span>
+    </div>
+
+    <!-- TEAM 1 ROW -->
+    <div class="teamRow" id="team1Row">
+      <div class="shortBox" id="short1Box">TMA</div>
+      <div class="teamMain" id="team1Main">
+        <div class="teamNormal" id="team1Normal">
+          <div class="scoreBox" id="scoreBox1"><span id="score1">0</span></div>
+          <span id="name1">TEAM A</span>
+        </div>
+        <div class="overlay" id="cardOverlay1">
+          <div class="cardIcon yellow" id="cardIcon1"></div>
+          <div class="cardText">
+            <span class="cardType" id="cardType1">Yellow Card</span>
+            <span class="cardPlayer" id="cardPlayer1">Player Name</span>
+          </div>
+        </div>
+        <div class="overlay" id="subOverlay1">
+          <div class="subContent">
+            <div class="subRow">
+              <span class="subArrow in">▲</span>
+              <span class="subName" id="subIn1">Player In</span>
+              <span style="opacity:0.7; font-size:15px;" id="subInNum1"></span>
+            </div>
+            <div class="subRow">
+              <span class="subArrow out">▼</span>
+              <span class="subName" id="subOut1">Player Out</span>
+              <span style="opacity:0.7; font-size:15px;" id="subOutNum1"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM 2 ROW -->
+    <div class="teamRow" id="team2Row">
+      <div class="shortBox" id="short2Box">TMB</div>
+      <div class="teamMain" id="team2Main">
+        <div class="teamNormal" id="team2Normal">
+          <div class="scoreBox" id="scoreBox2"><span id="score2">0</span></div>
+          <span id="name2">TEAM B</span>
+        </div>
+        <div class="overlay" id="cardOverlay2">
+          <div class="cardIcon yellow" id="cardIcon2"></div>
+          <div class="cardText">
+            <span class="cardType" id="cardType2">Yellow Card</span>
+            <span class="cardPlayer" id="cardPlayer2">Player Name</span>
+          </div>
+        </div>
+        <div class="overlay" id="subOverlay2">
+          <div class="subContent">
+            <div class="subRow">
+              <span class="subArrow in">▲</span>
+              <span class="subName" id="subIn2">Player In</span>
+              <span style="opacity:0.7; font-size:15px;" id="subInNum2"></span>
+            </div>
+            <div class="subRow">
+              <span class="subArrow out">▼</span>
+              <span class="subName" id="subOut2">Player Out</span>
+              <span style="opacity:0.7; font-size:15px;" id="subOutNum2"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const socket = io();
+
+let lastScore1 = null;
+let lastScore2 = null;
+let matchData  = {};
+
+// Build background: solid or half-split using linear-gradient
+function buildBg(color1, color2, useColor2) {
+  if (useColor2 && color2) {
+    return `linear-gradient(to right, ${color1} 50%, ${color2} 50%)`;
+  }
+  return color1;
+}
+
+// Auto-detect readable text color from a hex background
+function getTextColor(hex) {
+  if (!hex || hex.length < 7) return null;
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.72 ? "#000000" : "#ffffff";
+}
+
+// If user set white text AND the shortBox bg is also too bright, auto-detect instead
+function shortBoxTextColor(userTextColor, bgHex) {
+  if (userTextColor === "#ffffff" || userTextColor === "#fff") {
+    const auto = getTextColor(bgHex);
+    if (auto === "#000000") return "#000000"; // bg is bright, switch to black
+  }
+  return userTextColor;
+}
+
+// Build text-stroke CSS value
+function buildStroke(useStroke, strokeColor, strokeWidth) {
+  if (useStroke && strokeColor && strokeWidth > 0) {
+    return `${strokeWidth}px ${strokeColor}`;
+  }
+  return "0px transparent";
+}
+
+function applyTextStyle(ids, textColor, stroke) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.color = textColor;
+    el.style.webkitTextStroke = stroke;
+  });
+}
+
+socket.on("update", d => {
+  matchData = d;
+  document.getElementById("name1").textContent  = d.team1Name;
+  document.getElementById("name2").textContent  = d.team2Name;
+  document.getElementById("score1").textContent = d.team1Score;
+  document.getElementById("score2").textContent = d.team2Score;
+  document.getElementById("short1Box").textContent = d.team1Short;
+  document.getElementById("short2Box").textContent = d.team2Short;
+
+  const text1   = d.team1TextColor  || "#ffffff";
+  const text2   = d.team2TextColor  || "#ffffff";
+  const stroke1 = buildStroke(d.team1UseStroke, d.team1StrokeColor, d.team1StrokeWidth);
+  const stroke2 = buildStroke(d.team2UseStroke, d.team2StrokeColor, d.team2StrokeWidth);
+
+  // Background: half-split or solid
+  const mainBg1 = buildBg(d.team1Color, d.team1Color2, d.team1UseColor2);
+  const mainBg2 = buildBg(d.team2Color, d.team2Color2, d.team2UseColor2);
+
+  // shortBox always uses secondary color if enabled, else primary
+  const shortBg1 = (d.team1UseColor2 && d.team1Color2) ? d.team1Color2 : d.team1Color;
+  const shortBg2 = (d.team2UseColor2 && d.team2Color2) ? d.team2Color2 : d.team2Color;
+
+  document.getElementById("team1Main").style.background    = mainBg1;
+  document.getElementById("team2Main").style.background    = mainBg2;
+  document.getElementById("team1Normal").style.background  = "transparent";
+  document.getElementById("team2Normal").style.background  = "transparent";
+  // overlays always use primary color only (clean, no split)
+  document.getElementById("cardOverlay1").style.background = d.team1Color;
+  document.getElementById("cardOverlay2").style.background = d.team2Color;
+  document.getElementById("subOverlay1").style.background  = d.team1Color;
+  document.getElementById("subOverlay2").style.background  = d.team2Color;
+  // shortBox always uses secondary color (or primary if not using 2)
+  document.getElementById("short1Box").style.background    = shortBg1;
+  document.getElementById("short2Box").style.background    = shortBg2;
+
+  applyTextStyle(["team1Normal", "cardOverlay1", "subOverlay1"], text1, stroke1);
+  applyTextStyle(["team2Normal", "cardOverlay2", "subOverlay2"], text2, stroke2);
+  // shortBox: auto-detect if white text on bright bg, else use user color
+  const shortText1 = shortBoxTextColor(text1, shortBg1);
+  const shortText2 = shortBoxTextColor(text2, shortBg2);
+  applyTextStyle(["short1Box"], shortText1, stroke1);
+  applyTextStyle(["short2Box"], shortText2, stroke2);
+
+  let m = Math.floor(d.seconds / 60);
+  let s = d.seconds % 60;
+  document.getElementById("time").textContent =
+    String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+
+  const extraBox   = document.getElementById("extraBox");
+  const timeWrapper = document.getElementById("timeWrapper");
+  if (d.extra > 0) {
+    extraBox.textContent = "+" + d.extra;
+    timeWrapper.classList.remove("noExtra");
+    // small delay so padding transition renders before class add
+    requestAnimationFrame(() => extraBox.classList.add("show"));
+  } else {
+    extraBox.classList.remove("show");
+    // wait for slide-up to finish before collapsing padding
+    setTimeout(() => {
+      if (!extraBox.classList.contains("show")) {
+        timeWrapper.classList.add("noExtra");
+      }
+    }, 420);
+  }
+
+  if (d.leagueLogo) {
+    document.getElementById("leagueImg").src = d.leagueLogo;
+  }
+
+  if (lastScore1 === null) {
+    lastScore1 = d.team1Score;
+    lastScore2 = d.team2Score;
+    return;
+  }
+
+  if (d.team1Score > lastScore1) triggerGoal(d.team1Color, d.team1UseColor2 ? d.team1Color2 : d.team1Color);
+  if (d.team2Score > lastScore2) triggerGoal(d.team2Color, d.team2UseColor2 ? d.team2Color2 : d.team2Color);
+
+  lastScore1 = d.team1Score;
+  lastScore2 = d.team2Score;
+});
+
+// helper: show shortBox + overlay, hide after delay
+let subTimers  = { 1: null, 2: null };
+let cardTimers = { 1: null, 2: null };
+
+function showOverlay(overlayId, shortBoxId, duration) {
+  const overlay  = document.getElementById(overlayId);
+  const shortBox = document.getElementById(shortBoxId);
+  overlay.classList.add("show");
+  shortBox.classList.add("show");
+  return setTimeout(() => {
+    overlay.classList.remove("show");
+    shortBox.classList.remove("show");
+  }, duration);
+}
+
+// ---- CARD ----
+socket.on("card", (data) => {
+  const n = data.team;
+  document.getElementById("cardIcon"   + n).className =
+    "cardIcon " + (data.type === "Yellow Card" ? "yellow" : "red");
+  document.getElementById("cardType"   + n).textContent = data.type;
+  document.getElementById("cardPlayer" + n).textContent = "#" + data.number + " " + data.name;
+  clearTimeout(cardTimers[n]);
+  cardTimers[n] = showOverlay("cardOverlay" + n, "short" + n + "Box", 4000);
+});
+
+// ---- SUBSTITUTION ----
+socket.on("sub", (data) => {
+  const n = data.team;
+  document.getElementById("subIn"     + n).textContent = data.nameIn;
+  document.getElementById("subInNum"  + n).textContent = data.numberIn  ? "#" + data.numberIn  : "";
+  document.getElementById("subOut"    + n).textContent = data.nameOut;
+  document.getElementById("subOutNum" + n).textContent = data.numberOut ? "#" + data.numberOut : "";
+  clearTimeout(subTimers[n]);
+  subTimers[n] = showOverlay("subOverlay" + n, "short" + n + "Box", 4000);
+});
+
+// ---- GOAL ----
+function triggerGoal(colorLeft, colorRight) {
+  const box     = document.getElementById("goalBox");
+  const letters = box.querySelectorAll("span");
+  box.style.display          = "flex";
+  box.style.left             = "-100%";
+  box.style.borderLeftColor  = colorLeft;
+  box.style.borderRightColor = colorRight;
+  box.classList.remove("slide");
+  void box.offsetWidth;
+  box.classList.add("slide");
+  letters[0].style.transform = "translateX(-50px)";
+  letters[1].style.transform = "translateX(-15px)";
+  letters[2].style.transform = "translateX(15px)";
+  letters[3].style.transform = "translateX(50px)";
+  box.addEventListener("animationend", function handler() {
+    box.style.display = "none";
+    letters.forEach(l => l.style.transform = "translateX(0)");
+    box.removeEventListener("animationend", handler);
+  });
+}
+</script>
+
+</body>
+</html>
