@@ -2,6 +2,10 @@
 
 An open-source customizable real-time football scoreboard system.
 
+## UPDATE
+- Penalty Kick System
+- Now you can choose two colors for one team!
+
 ---
 
 ## 🚀 Current Features
@@ -13,17 +17,18 @@ An open-source customizable real-time football scoreboard system.
 - First half / Second half system  
 - Goal animation  
 - Yellow / Red card system  
-- Substitution display system 
+- Substitution display system
+- Penalty Kick System
+- 
+  This is penalty kick scorboard looks like :
+  
+  <img width="449" height="148" alt="image" src="https://github.com/user-attachments/assets/2fb9eef2-18ea-415a-9269-9274c5a20706" />
+
 
 ---
 
 ### ⌛ In Progress
-- Penalty Kick System
-
-This is an example image from the game eFootball, which we will replicate (but we won't be copying the theme exactly 100%).
-
-<img width="277" height="84" alt="image" src="https://github.com/user-attachments/assets/bc9fee75-a3ba-4b9b-a662-4f391ab86f9d" />
-
+- None at the moment
 
 ---
 
