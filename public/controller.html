@@ -97,7 +97,21 @@ button, input, select {
   <h3>Team 1</h3>
   <input id="t1name"      placeholder="Full Name">
   <input id="t1shortName" placeholder="Short (3 letters)">
+  <br>
+  <label>Primary Color:</label>
   <input type="color" id="t1color" value="#1e88e5">
+  <label style="margin-left:10px;">Secondary Color:</label>
+  <input type="color" id="t1color2" value="#1565c0">
+  <label><input type="checkbox" id="t1useColor2"> Use 2 colors</label>
+  <br>
+  <label>Text Color:</label>
+  <input type="color" id="t1textColor" value="#ffffff">
+  <br>
+  <label><input type="checkbox" id="t1useStroke"> Text Stroke:</label>
+  <input type="color" id="t1strokeColor" value="#000000">
+  <label>Width:</label>
+  <input type="number" id="t1strokeWidth" value="1" min="0" max="5" style="width:50px;">
+  <br>
   <button onclick="updateTeam(1)">Update</button>
   <button onclick="score(1, 1)">+1 Goal</button>
   <button onclick="score(1, -1)">-1 Goal</button>
@@ -108,7 +122,21 @@ button, input, select {
   <h3>Team 2</h3>
   <input id="t2name"      placeholder="Full Name">
   <input id="t2shortName" placeholder="Short (3 letters)">
+  <br>
+  <label>Primary Color:</label>
   <input type="color" id="t2color" value="#fdd835">
+  <label style="margin-left:10px;">Secondary Color:</label>
+  <input type="color" id="t2color2" value="#f9a825">
+  <label><input type="checkbox" id="t2useColor2"> Use 2 colors</label>
+  <br>
+  <label>Text Color:</label>
+  <input type="color" id="t2textColor" value="#000000">
+  <br>
+  <label><input type="checkbox" id="t2useStroke"> Text Stroke:</label>
+  <input type="color" id="t2strokeColor" value="#000000">
+  <label>Width:</label>
+  <input type="number" id="t2strokeWidth" value="1" min="0" max="5" style="width:50px;">
+  <br>
   <button onclick="updateTeam(2)">Update</button>
   <button onclick="score(2, 1)">+1 Goal</button>
   <button onclick="score(2, -1)">-1 Goal</button>
@@ -136,12 +164,57 @@ button, input, select {
   <button onclick="setExtra()">Set</button>
 </div>
 
+
+<!-- PENALTY SHOOTOUT -->
+<div class="section">
+  <h3>⚽ Penalty Shootout</h3>
+  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <strong id="pen-t1-label" style="min-width:80px;">Team 1</strong>
+      <button onclick="nextKick(1,'scored')" style="background:#2ecc40;color:#fff;border:none;padding:6px 16px;cursor:pointer;border-radius:3px;font-size:14px;font-weight:bold;">⚽ Goal</button>
+      <button onclick="nextKick(1,'missed')" style="background:#e53935;color:#fff;border:none;padding:6px 16px;cursor:pointer;border-radius:3px;font-size:14px;font-weight:bold;">✕ Missed</button>
+      <button onclick="undoKick(1)" style="background:#999;color:#fff;border:none;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:14px;">↺ Undo</button>
+      <span id="pen-preview-1" style="font-size:13px; color:#555;"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <strong id="pen-t2-label" style="min-width:80px;">Team 2</strong>
+      <button onclick="nextKick(2,'scored')" style="background:#2ecc40;color:#fff;border:none;padding:6px 16px;cursor:pointer;border-radius:3px;font-size:14px;font-weight:bold;">⚽ Goal</button>
+      <button onclick="nextKick(2,'missed')" style="background:#e53935;color:#fff;border:none;padding:6px 16px;cursor:pointer;border-radius:3px;font-size:14px;font-weight:bold;">✕ Missed</button>
+      <button onclick="undoKick(2)" style="background:#999;color:#fff;border:none;padding:6px 12px;cursor:pointer;border-radius:3px;font-size:14px;">↺ Undo</button>
+      <span id="pen-preview-2" style="font-size:13px; color:#555;"></span>
+    </div>
+  </div>
+  <button onclick="addKick()" style="margin-right:6px;">+ Sudden Death Kick</button>
+  <button onclick="resetPenalty()" style="background:#e53935;color:#fff;border:none;padding:6px 12px;cursor:pointer;border-radius:3px;">Reset All</button>
+</div>
+
 <script>
 const socket = io();
 let current = {};
 
 socket.on("update", d => {
   current = d;
+  // Update penalty team labels
+  const l1 = document.getElementById("pen-t1-label");
+  const l2 = document.getElementById("pen-t2-label");
+  if (l1) l1.textContent = d.team1Name || "Team 1";
+  if (l2) l2.textContent = d.team2Name || "Team 2";
+  // Sync color pickers to current state
+  if (d.team1Color)     document.getElementById("t1color").value      = d.team1Color;
+  if (d.team1Color2)    document.getElementById("t1color2").value     = d.team1Color2;
+  if (d.team1TextColor) document.getElementById("t1textColor").value  = d.team1TextColor;
+  document.getElementById("t1useColor2").checked   = !!d.team1UseColor2;
+  document.getElementById("t1useStroke").checked   = !!d.team1UseStroke;
+  if (d.team1StrokeColor) document.getElementById("t1strokeColor").value = d.team1StrokeColor;
+  if (d.team1StrokeWidth !== undefined) document.getElementById("t1strokeWidth").value = d.team1StrokeWidth;
+
+  if (d.team2Color)     document.getElementById("t2color").value      = d.team2Color;
+  if (d.team2Color2)    document.getElementById("t2color2").value     = d.team2Color2;
+  if (d.team2TextColor) document.getElementById("t2textColor").value  = d.team2TextColor;
+  document.getElementById("t2useColor2").checked   = !!d.team2UseColor2;
+  document.getElementById("t2useStroke").checked   = !!d.team2UseStroke;
+  if (d.team2StrokeColor) document.getElementById("t2strokeColor").value = d.team2StrokeColor;
+  if (d.team2StrokeWidth !== undefined) document.getElementById("t2strokeWidth").value = d.team2StrokeWidth;
 });
 
 // ---- SUBSTITUTION ----
@@ -187,15 +260,27 @@ function uploadLogo() {
 function updateTeam(n) {
   if (n === 1) {
     socket.emit("updateMatch", {
-      team1Name:  document.getElementById("t1name").value      || current.team1Name,
-      team1Short: document.getElementById("t1shortName").value || current.team1Short,
-      team1Color: document.getElementById("t1color").value
+      team1Name:        document.getElementById("t1name").value      || current.team1Name,
+      team1Short:       document.getElementById("t1shortName").value || current.team1Short,
+      team1Color:       document.getElementById("t1color").value,
+      team1Color2:      document.getElementById("t1color2").value,
+      team1UseColor2:   document.getElementById("t1useColor2").checked,
+      team1TextColor:   document.getElementById("t1textColor").value,
+      team1UseStroke:   document.getElementById("t1useStroke").checked,
+      team1StrokeColor: document.getElementById("t1strokeColor").value,
+      team1StrokeWidth: Number(document.getElementById("t1strokeWidth").value)
     });
   } else {
     socket.emit("updateMatch", {
-      team2Name:  document.getElementById("t2name").value      || current.team2Name,
-      team2Short: document.getElementById("t2shortName").value || current.team2Short,
-      team2Color: document.getElementById("t2color").value
+      team2Name:        document.getElementById("t2name").value      || current.team2Name,
+      team2Short:       document.getElementById("t2shortName").value || current.team2Short,
+      team2Color:       document.getElementById("t2color").value,
+      team2Color2:      document.getElementById("t2color2").value,
+      team2UseColor2:   document.getElementById("t2useColor2").checked,
+      team2TextColor:   document.getElementById("t2textColor").value,
+      team2UseStroke:   document.getElementById("t2useStroke").checked,
+      team2StrokeColor: document.getElementById("t2strokeColor").value,
+      team2StrokeWidth: Number(document.getElementById("t2strokeWidth").value)
     });
   }
 }
@@ -230,7 +315,75 @@ function setExtra() {
   const val = Number(document.getElementById("extraInput").value);
   socket.emit("updateMatch", { extra: val > 0 ? val : 0 });
 }
+
+// ---- PENALTY ----
+let penState = {
+  1: { kicks: ["pending","pending","pending","pending","pending"], score: 0 },
+  2: { kicks: ["pending","pending","pending","pending","pending"], score: 0 }
+};
+
+function updatePreview(team) {
+  const kicks = penState[team].kicks;
+  const nextIndex = kicks.findIndex(k => k === "pending");
+  const preview = document.getElementById("pen-preview-" + team);
+  if (!preview) return;
+  if (nextIndex === -1) {
+    preview.textContent = "All kicks done";
+  } else {
+    preview.textContent = "Kick " + (nextIndex + 1) + " of " + kicks.length;
+  }
+}
+
+function renderPenController() {
+  updatePreview(1);
+  updatePreview(2);
+}
+
+// Set the next pending kick to scored or missed
+function nextKick(team, result) {
+  const kicks = penState[team].kicks;
+  const nextIndex = kicks.findIndex(k => k === "pending");
+  if (nextIndex === -1) return; // all done
+  kicks[nextIndex] = result;
+  penState[team].score = kicks.filter(k => k === "scored").length;
+  socket.emit("penaltyState", penState);
+  renderPenController();
+}
+
+// Undo last non-pending kick
+function undoKick(team) {
+  const kicks = penState[team].kicks;
+  // find last scored or missed
+  for (let i = kicks.length - 1; i >= 0; i--) {
+    if (kicks[i] !== "pending") {
+      kicks[i] = "pending";
+      penState[team].score = kicks.filter(k => k === "scored").length;
+      socket.emit("penaltyState", penState);
+      renderPenController();
+      return;
+    }
+  }
+}
+
+function addKick() {
+  penState[1].kicks.push("pending");
+  penState[2].kicks.push("pending");
+  socket.emit("penaltyState", penState);
+  renderPenController();
+}
+
+function resetPenalty() {
+  penState = {
+    1: { kicks: ["pending","pending","pending","pending","pending"], score: 0 },
+    2: { kicks: ["pending","pending","pending","pending","pending"], score: 0 }
+  };
+  socket.emit("penaltyState", penState);
+  renderPenController();
+}
+
+renderPenController();
 </script>
 
 </body>
 </html>
+
